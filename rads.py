@@ -19,7 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with RADS.  If not, see <http://www.gnu.org/licenses/>.
 
-
 # rads.py: this file is the lead import for operating rads
 
 import sys
@@ -31,7 +30,6 @@ import osr
 import gdal
 from joblib import Parallel, delayed
 from scipy.interpolate import RegularGridInterpolator
-from scipy.optimize import minimize, brent
 
 try:
     execfile ('../python/gdal_raster_io.py')

@@ -47,7 +47,7 @@ def get_instructions ():
     except:
         print ('ERROR: I need instructions!')
         sys.exit()
-    
+        
 def rads_execute ():
     """
     Executes the calculation engine for the supplied points
@@ -57,6 +57,7 @@ def rads_execute ():
     future, perhaps pass variables as a dict, or list, or the path to the file to help make
     the program structure easier to refactor to another language.
     """
+    
     rads_welcome()
     instruction, target_id = get_instructions()
     
@@ -73,6 +74,7 @@ def rads_execute ():
     print ('Setup complete . . ')
     print ('-----------------------------------------')
 
+    ###############################################################
     # PROBE A POINT
     if instruction == 'probe':
         point = points[points[:,0] == target_id,:]
@@ -84,11 +86,15 @@ def rads_execute ():
         # create a global dtm profiler object
         dtm_pro = rads_profiler (dtm, wind_dir)
         bsmt_pro = rads_profiler (bsmt, wind_dir)
-        
+
         res = Parallel (n_jobs = n_processes, batch_size = 1, verbose = 10) (delayed (rads_process_point) 
                         (points[i,:], dtm_pro, bsmt_pro, wind_dir, vpeak, gamma) for i in range(0, points.shape[0]))
         oput = np.array (res)
 
+        # uncomment for serial debugging
+        #for i in range(0, points.shape[0]):
+        #    res = rads_process_point (points[i,:], dtm_pro, bsmt_pro, wind_dir, vpeak, gamma)
+        
         # output csv file
         np.savetxt ('rads_output.csv', oput, delimiter = ',', header = oput_header, comments = '')
         print ('Output file written . .')
@@ -197,11 +203,7 @@ def rads_process_point (point, dtm_pro, bsmt_pro, wind_dir, vpeak, gamma):
     y_loc = point[2]
     
     bl = blowout (id, x_loc, y_loc, dtm_pro, bsmt_pro, flux, vpeak, gamma)
-    try:
-        bl.fit_evolution ('vpe')                    # fit the dig
-    except:
-        print ('ERROR with id: ' + str(id))
-        
+    bl.fit_evolution ('vpe')                    # fit the dig
     res = bl.return_status()                    # get the results
     return (res)
 
@@ -281,6 +283,7 @@ def rads_step_point_montecarlo (point, dtm, bsmt, wind_dir, vpeak, gamma):
     vpeak = the vegetation deposition tolerance
     gamma = representative gamma value
     """
+    
     dtm_pro = rads_profiler (dtm, wind_dir)
     bsmt_pro = rads_profiler (bsmt, wind_dir)
 

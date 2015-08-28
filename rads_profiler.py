@@ -34,7 +34,7 @@ class rads_profiler:
         wind_dir = the compass azimuth associated with resultant wind direction
         """
         # flip the dtm
-        dtm_flip = np.flipud (dtm.ras)       # flip the raster
+        dtm_flip = np.flipud (dtm.ras)          # flip the raster
         y_index_flip = dtm.y_index[::-1]        # flip the y index
         
         # create interpolator
@@ -69,6 +69,7 @@ class rads_profiler:
             dists = dists[::-1]         # sort from furthest upwind to closest
         else:
             dists = np.arange (0.0, (steps * self.step), self.inc)
+        
         # compute point locations
         x_locs = x_loc - (dists * math.sin (self.wind_dir_rad))
         y_locs = y_loc - (dists * math.cos (self.wind_dir_rad))
@@ -93,6 +94,7 @@ class rads_profiler:
         x_loc = x location of profile start
         y_loc = y location of profile start
         """
+        
         point = np.array([y_loc, x_loc])
         elev = self.interpolator (point)
         return (elev[0])

@@ -90,9 +90,9 @@ class blowout:
         self.bsmt_elev = self.bsmt_pro.get_elev (x_loc = x_loc, y_loc = y_loc)
     
         # get initial profiles
-        self.dists = np.nan          # the distance array (negative is upwind)
-        self.dtm = np.nan            # the dtm surface at corresponding distances
-        self.bsmt = np.nan           # the bsmt surface at corresponding distances
+        self.dists = np.nan                 # the distance array (negative is upwind)
+        self.dtm = np.nan                   # the dtm surface at corresponding distances
+        self.bsmt = np.nan                  # the bsmt surface at corresponding distances
         
         self.dists_uw = np.array([np.nan])
         self.dists_dw = np.array([np.nan])
@@ -101,23 +101,22 @@ class blowout:
         self.bsmt_uw = np.array([np.nan])
         self.bsmt_dw = np.array([np.nan])
 
-        self.steps_uw = 0               # set initial step counter
-        self.steps_dw = 0               # set initial step counter
+        self.steps_uw = 0                   # set initial step counter
+        self.steps_dw = 0                   # set initial step counter
         uw_status = self.extend_profile ('upwind')
         dw_status = self.extend_profile ('downwind')
 
-
         if not uw_status or not dw_status:
-            self.status = False         # this site is not good, we can't get a prelim
-                                        # profile
+            self.status = False             # this site is not good, we can't get a prelim
+                                            # profile
         
         return
         
     def extend_profile (self, direction):
         """
-        Internal method to revise the internal profiles. this tries to extend, but
-        if it goes off the raster, it returns False, and does not update internal
-        profile variables.
+        Internal method to revise the internal profiles. Returns boolean corresponding to 
+        whether or not the extension was successful. If the extension goes off the raster
+        edge or returns NAs, the method returns False, else True.     
         
         direction = 'upwind' or 'downwind'
         """
@@ -128,8 +127,10 @@ class blowout:
             _dists_uw, _bsmt_uw = self.bsmt_pro.profile (self.x_loc, self.y_loc, _steps_uw, 'upwind')
             
             # check for any na's in the profile
-            if len(_dtm_uw[np.isnan(_dtm_uw)]) > 0:
+            if len(_dtm_uw[np.isnan(_dtm_uw)]) > 0 or len(_bsmt_uw[np.isnan(_bsmt_uw)]) > 0:
                 success = False
+                #self.dtm_uw = numpy.nan
+                #self.bsmt_uw = numpy.nan
             else:
                 success = True
                 self.steps_uw = _steps_uw
@@ -143,8 +144,10 @@ class blowout:
             _dists_dw, _bsmt_dw = self.bsmt_pro.profile (self.x_loc, self.y_loc, _steps_dw, 'downwind')
         
             # check for any na's in the profile
-            if len(_dtm_dw[np.isnan(_dtm_dw)]) > 0:
+            if len(_dtm_dw[np.isnan(_dtm_dw)]) > 0 or len(_bsmt_dw[np.isnan(_bsmt_dw)]) > 0:
                 success = False
+                #self.dtm_dw = numpy.nan
+                #self.bsmt_dw = numpy.nan
             else:
                 success = True
                 self.steps_dw = _steps_dw
@@ -153,11 +156,11 @@ class blowout:
                 self.bsmt_dw = _bsmt_dw        
         
         if success:
-            # reconstruct profile with results and internals
+            # reconstruct profile with results and assign internals
             self.dists = np.append (self.dists_uw, self.dists_dw)
             self.dtm = np.append (self.dtm_uw, self.dtm_dw)
             self.bsmt = np.append (self.bsmt_uw, self.bsmt_dw)
-        
+
         return (success)
     
     def bl_profile (self, dig, brink_dist, advance):
@@ -228,7 +231,7 @@ class blowout:
         self.dw_edge_coord = numpy.nan
         self.slipface_start_coord = numpy.nan
         
-        # 1) check for an upwind surface breakout
+        # 1) check for an upwind surface breakout and any nans
         while True:
             self.bl_profile (dig, brink_dist, advance)
             diff = self.bl - self.dtm
@@ -250,7 +253,7 @@ class blowout:
             
         self.bl_profile (dig, brink_dist, advance)      # recalculate the profile
         diff = self.bl - self.dtm                       # recalculate the diff
-
+        
         # 3) check for a downwind surface breakout
         if len(diff[(self.dists > 0.0) & (diff > 0.0)]) == 0:
             self.no_surface_breakout = True
@@ -604,7 +607,7 @@ class blowout:
         the dig minimization routine to move the dune out, and away from the target point. We
         hold the dig constant and try progressive advances until we find the best advance.
                 
-        variable = the variable to fit
+        variable = the variable to fit: 'vpe' or 'time'
         """
         
         adv_tolerance = 0.05
