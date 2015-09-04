@@ -45,3 +45,10 @@ plot_profile <- function (){
 png('profile.png', width = 1000, height = 500)
 plot_profile()
 dev.off()
+
+postscript ('profile.eps') 
+plot_profile()
+dev.off()
+
+
+

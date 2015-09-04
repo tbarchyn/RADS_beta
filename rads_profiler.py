@@ -33,6 +33,7 @@ class rads_profiler:
         dtm = the dtm ref_raster object
         wind_dir = the compass azimuth associated with resultant wind direction
         """
+        
         # flip the dtm
         dtm_flip = np.flipud (dtm.ras)          # flip the raster
         y_index_flip = dtm.y_index[::-1]        # flip the y index

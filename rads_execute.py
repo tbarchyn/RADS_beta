@@ -108,6 +108,46 @@ def rads_execute ():
         # output csv file
         np.savetxt ('rads_step_output.csv', oput, delimiter = ',', header = oput_header, comments = '')
         print ('Output file written . .')
+
+    ###############################################################
+    # STEP A POINT WITH A LIST
+    elif instruction == 'step_list':
+        # read in the list of points to step
+        steps = np.loadtxt (step_list, skiprows = 1, delimiter = ',')
+        
+        for i in range(0, steps.shape[0]):
+            target_id = steps[i, 1]
+            print ('processing target:' + str(target_id))
+            try:
+                os.unlink ('rads_step_output.csv')
+            except:
+                pass
+                
+            point = points[points[:,0] == target_id,:]
+            oput = rads_step_point (point[0,:], dtm, bsmt, wind_dir, vpeak, gamma)
+            
+            # output csv
+            np.savetxt ('rads_step_output.csv', oput, delimiter = ',', header = oput_header, comments = '')
+
+            # run the R script to make plots 
+            ret = os.system ('Rscript.exe rads_step_plot.R step_profiles')
+            if ret != 0:
+                sys.exit()
+    
+            # rename the output file
+            csv_filename = 'rads_step_output_' + str(int(steps[i, 0])) + '.csv'
+            if os.path.exists (csv_filename):
+                os.unlink (csv_filename)
+            
+            os.rename ('rads_step_output.csv', csv_filename)
+        
+            # rename the directory
+            target_directory =  'target_' + str(int(steps[i, 0]))
+            if os.path.isdir (target_directory): 
+                shutil.rmtree (target_directory)
+            
+            os.rename ('step_profiles', target_directory)
+            print ('completed id: ' + str(int(steps[i, 0])))
     
     ###############################################################
     # STEP A POINT MONTECARLO
@@ -237,7 +277,7 @@ def rads_step_point (point, dtm, bsmt, wind_dir, vpeak, gamma):
         os.mkdir ('step_profiles')
     else:
         os.mkdir ('step_profiles')
-    
+        
     # loop through years, forward in time
     for years in range(1, max_years + 1):
         bl.flux = flux                          # use constant flux
@@ -264,9 +304,6 @@ def rads_step_point (point, dtm, bsmt, wind_dir, vpeak, gamma):
     
     # print status
     bl.print_status ()
-    
-    # run the R script to make plots 
-    os.system ('Rscript.exe rads_step_plot.R step_profiles ' + str(id))
     
     return (oput)
 

@@ -86,13 +86,13 @@ class blowout:
         self.status = True                  # fit status    
 
         # get surface and basement elevations at target cell
-        self.surface_elev = self.dtm_pro.get_elev (x_loc = x_loc, y_loc = y_loc)
-        self.bsmt_elev = self.bsmt_pro.get_elev (x_loc = x_loc, y_loc = y_loc)
+        self.surface_elev = self.dtm_pro.get_elev (x_loc = self.x_loc, y_loc = self.y_loc)
+        self.bsmt_elev = self.bsmt_pro.get_elev (x_loc = self.x_loc, y_loc = self.y_loc)
     
         # get initial profiles
-        self.dists = np.nan                 # the distance array (negative is upwind)
-        self.dtm = np.nan                   # the dtm surface at corresponding distances
-        self.bsmt = np.nan                  # the bsmt surface at corresponding distances
+        self.dists = np.array([np.nan])     # the distance array (negative is upwind)
+        self.dtm = np.array([np.nan])       # the dtm surface at corresponding distances
+        self.bsmt = np.array([np.nan])      # the bsmt surface at corresponding distances
         
         self.dists_uw = np.array([np.nan])
         self.dists_dw = np.array([np.nan])
@@ -129,8 +129,6 @@ class blowout:
             # check for any na's in the profile
             if len(_dtm_uw[np.isnan(_dtm_uw)]) > 0 or len(_bsmt_uw[np.isnan(_bsmt_uw)]) > 0:
                 success = False
-                #self.dtm_uw = numpy.nan
-                #self.bsmt_uw = numpy.nan
             else:
                 success = True
                 self.steps_uw = _steps_uw
@@ -146,8 +144,6 @@ class blowout:
             # check for any na's in the profile
             if len(_dtm_dw[np.isnan(_dtm_dw)]) > 0 or len(_bsmt_dw[np.isnan(_bsmt_dw)]) > 0:
                 success = False
-                #self.dtm_dw = numpy.nan
-                #self.bsmt_dw = numpy.nan
             else:
                 success = True
                 self.steps_dw = _steps_dw
@@ -425,7 +421,7 @@ class blowout:
         bl1 = self.bl[self.dw_edge_coord - 1]                   # get blowout profile before cross over
         bl2 = self.bl[self.dw_edge_coord]                       # get blowout profile after cross over
         x = 1.0 - ((dtm2 - bl2) / ((bl1-bl2)-(dtm1-dtm2)))      # get the cross over fraction along the sample
-        self.slip_bottom_elev = (bl1 * (1.0-x)) + (bl2 * x)     # get weighted average
+        self.slip_bottom_elev = (bl1 * (1.0 - x)) + (bl2 * x)   # get weighted average
         slip_ht = self.brink_elev - self.slip_bottom_elev
         slip_wd = slip_ht / math.tan (repose * (math.pi / 180.0))
         

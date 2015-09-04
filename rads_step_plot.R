@@ -68,7 +68,9 @@ for (filename in file_list) {
     year <- get_year_from_filename (filename)
     years <- c(years, year)
 }
+
 max_year <- max(years)
+filename <- paste ('t_', max_year, '.csv', sep = '')
 pro <- read.table (filename, header = T, sep = ',')
 max_y = max(pro$dtm) + 15.0
 min_y = min(pro$bsmt[pro$bsmt > -1000]) # sometimes basement comes back with nas
@@ -82,9 +84,8 @@ for (filename in file_list) {
     plot_profile (filename, xlims, ylims)
 }
 
-
 # run quantile plots
-source ('../rads_step_output.R')
+source ('../rads_step_quants.R')
 run_quants()
 
 print ('plotting complete')
